@@ -66,6 +66,8 @@ class _BadgedIconButtonState extends State<BadgedIconButton> {
             child: InkResponse(
               onTap: widget.onPressed,
               radius: widget.tapRadius,
+              hoverColor: Colors.transparent,
+              highlightColor: Colors.transparent,
               child: Center(
                 child: SizedBox(
                   width: widget.iconSize,
@@ -86,7 +88,7 @@ class _BadgedIconButtonState extends State<BadgedIconButton> {
               top: widget.badgeOffset.dy,
               right: widget.badgeOffset.dx,
               child: IgnorePointer(
-                child: BadgedIconButtonBadge(content: badge),
+                child: BadgedIconButtonBadge(content: badge, color: iconColor),
               ),
             ),
         ],
@@ -122,10 +124,14 @@ class _BadgedIconButtonState extends State<BadgedIconButton> {
 }
 
 class BadgedIconButtonBadge extends StatelessWidget {
-  const BadgedIconButtonBadge({super.key, required this.content})
-    : assert(content is String || content is Widget);
+  const BadgedIconButtonBadge({
+    super.key,
+    required this.content,
+    required this.color,
+  }) : assert(content is String || content is Widget);
 
   final Object content;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -135,19 +141,26 @@ class BadgedIconButtonBadge extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
       padding: const EdgeInsets.symmetric(horizontal: 5),
       alignment: Alignment.center,
-      child: _buildChild(theme),
+      child: _buildChild(theme, color),
     );
   }
 
-  Widget _buildChild(ThemeData theme) {
+  Widget _buildChild(ThemeData theme, Color color) {
     final Object content = this.content;
     if (content is Widget) {
-      return content;
+      return IconTheme.merge(
+        data: IconThemeData(color: color),
+        child: DefaultTextStyle.merge(
+          style: TextStyle(color: color),
+          child: content,
+        ),
+      );
     }
     return Text(
       content as String,
       textAlign: TextAlign.center,
       style: theme.textTheme.labelSmall?.copyWith(
+        color: color,
         fontWeight: FontWeight.w700,
         fontSize: 8,
         height: 1,
