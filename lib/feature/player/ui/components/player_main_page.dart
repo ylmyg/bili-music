@@ -1,3 +1,5 @@
+import 'package:bilimusic/common/bm_icons.dart';
+import 'package:bilimusic/common/components/badged_icon_button.dart';
 import 'package:bilimusic/feature/player/domain/audio_stream_info.dart';
 import 'package:bilimusic/feature/player/domain/playable_item.dart';
 import 'package:bilimusic/feature/player/domain/player_online_audience.dart';
@@ -219,44 +221,13 @@ class _PlayerCommentToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final String? badgeLabel = _formatCommentBadgeCount(commentCount);
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        _PlayerToolButton(
-          icon: const Icon(Icons.comment_outlined),
-          isEnabled: isEnabled,
-          onTap: onTap,
-        ),
-        if (isEnabled && badgeLabel != null)
-          Positioned(
-            top: -2,
-            right: -8,
-            child: IgnorePointer(
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  badgeLabel,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
+    return BadgedIconButton(
+      noBadgeIcon: const Icon(Icons.comment_outlined),
+      badgeIcon: const Icon(BmIcons.commentWithBadge),
+      badge: badgeLabel,
+      onPressed: isEnabled ? onTap : null,
     );
   }
 }
@@ -276,29 +247,18 @@ class _PlayerQualityToolButton extends ConsumerWidget {
         .where((AudioQualityOption option) => option.isSelected)
         .firstOrNull;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        _PlayerToolButton(
-          icon: const Icon(Icons.graphic_eq_rounded),
-          isEnabled: isEnabled,
-          onTap: !isEnabled
-              ? null
-              : () => _showPlayerQualitySheet(
-                  context: context,
-                  ref: ref,
-                  qualities: qualities,
-                ),
-        ),
-        if (isEnabled && selected != null)
-          Positioned(
-            top: -2,
-            right: -12,
-            child: IgnorePointer(
-              child: _ToolButtonBadge(label: selected.label),
+    return BadgedIconButton(
+      noBadgeIcon: const Icon(Icons.graphic_eq_rounded),
+      badgeIcon: const Icon(Icons.graphic_eq_rounded),
+      badge: selected?.label,
+      badgeOffset: const Offset(-12, -2),
+      onPressed: !isEnabled
+          ? null
+          : () => _showPlayerQualitySheet(
+              context: context,
+              ref: ref,
+              qualities: qualities,
             ),
-          ),
-      ],
     );
   }
 }
@@ -380,53 +340,11 @@ class _PlayerPartToolButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final int currentPage = item?.page ?? 1;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        _PlayerToolButton(
-          icon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
-          isEnabled: isEnabled,
-          onTap: onTap,
-        ),
-        if (isEnabled)
-          Positioned(
-            top: -2,
-            right: -8,
-            child: IgnorePointer(
-              child: _ToolButtonBadge(label: 'P$currentPage'),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _ToolButtonBadge extends StatelessWidget {
-  const _ToolButtonBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    return Container(
-      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: colorScheme.onPrimary,
-          fontWeight: FontWeight.w800,
-          height: 1,
-        ),
-      ),
+    return BadgedIconButton(
+      noBadgeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
+      badgeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
+      badge: 'P$currentPage',
+      onPressed: isEnabled ? onTap : null,
     );
   }
 }
