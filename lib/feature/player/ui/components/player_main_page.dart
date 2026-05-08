@@ -221,7 +221,7 @@ class _PlayerCommentToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String? badgeLabel = _formatCommentBadgeCount(commentCount);
+    final String? badgeLabel = formatCommentBadgeCount(commentCount);
 
     return BadgedIconButton(
       noBadgeIcon: HugeIcon(icon: HugeIcons.strokeRoundedComment01),
@@ -312,16 +312,6 @@ Future<void> _showPlayerQualitySheet({
   );
 }
 
-String? _formatCommentBadgeCount(int? count) {
-  if (count == null || count <= 0) {
-    return null;
-  }
-  if (count <= 999) {
-    return count.toString();
-  }
-  return '999+';
-}
-
 class _PlayerPartToolButton extends StatelessWidget {
   const _PlayerPartToolButton({
     required this.item,
@@ -335,8 +325,8 @@ class _PlayerPartToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int currentPage = item?.page ?? 1;
-    final int digitCount = currentPage.toString().length;
+    final String? badge = formatPartBadge(item);
+    final int digitCount = (item?.page ?? 1).toString().length;
     final Offset badgeOffset = switch (digitCount) {
       1 => const Offset(2, 4),
       2 => const Offset(-2, 4),
@@ -346,7 +336,7 @@ class _PlayerPartToolButton extends StatelessWidget {
     return BadgedIconButton(
       noBadgeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
       badgeIcon: const Icon(BmIcons.partListWithBadge, size: 26),
-      badge: 'P$currentPage',
+      badge: badge,
       onPressed: isEnabled ? onTap : null,
       badgeOffset: badgeOffset,
     );

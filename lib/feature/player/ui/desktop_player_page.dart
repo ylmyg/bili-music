@@ -1,3 +1,5 @@
+import 'package:bilimusic/common/bm_icons.dart';
+import 'package:bilimusic/common/components/badged_icon_button.dart';
 import 'package:bilimusic/common/components/bar_icon_button.dart';
 import 'package:bilimusic/common/components/cached_image.dart';
 import 'package:bilimusic/common/components/desktop/desktop_side_panel.dart';
@@ -569,12 +571,17 @@ class _DesktopPlayerControlDeck extends StatelessWidget {
                           onPressed: onFavoriteToggle,
                         ),
                         const SizedBox(width: 8),
-                        BarIconButton(
-                          icon: HugeIcon(
+                        BadgedIconButton(
+                          noBadgeIcon: HugeIcon(
                             icon: HugeIcons.strokeRoundedComment01,
                             size: 20,
                             strokeWidth: 2,
                           ),
+                          badgeIcon: const Icon(
+                            BmIcons.commentWithBadge,
+                            size: 26,
+                          ),
+                          badge: formatCommentBadgeCount(item?.replyCount),
                           tooltip: '评论',
                           onPressed: onOpenComments,
                         ),
@@ -698,11 +705,17 @@ class _DesktopPlayerControlDeck extends StatelessWidget {
                           onSelected: onSelectQuality,
                         ),
                         const SizedBox(width: 16),
-                        BarIconButton(
-                          icon: HugeIcon(
+                        BadgedIconButton(
+                          noBadgeIcon: const HugeIcon(
                             icon: HugeIcons.strokeRoundedListVideo,
                             size: 22,
                           ),
+                          badgeIcon: const Icon(
+                            BmIcons.partListWithBadge,
+                            size: 26,
+                          ),
+                          badge: formatPartBadge(item),
+                          badgeOffset: const Offset(-10, -2),
                           tooltip: '选择分 P',
                           onPressed: onPartTap,
                         ),

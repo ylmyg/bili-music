@@ -32,3 +32,21 @@ String resolvePlayerDurationLabel(PlayerState state, PlayableItem? item) {
   }
   return item?.durationText ?? '--:--';
 }
+
+String? formatCommentBadgeCount(int? count) {
+  if (count == null || count <= 0) {
+    return null;
+  }
+  if (count <= 999) {
+    return count.toString();
+  }
+  return '999+';
+}
+
+String? formatPartBadge(PlayableItem? item) {
+  if (item == null) {
+    return null;
+  }
+  final int currentPage = item.page ?? 1;
+  return 'P$currentPage';
+}

@@ -1,3 +1,5 @@
+import 'package:bilimusic/common/bm_icons.dart';
+import 'package:bilimusic/common/components/badged_icon_button.dart';
 import 'package:bilimusic/common/components/bar_icon_button.dart';
 import 'package:bilimusic/common/components/cached_image.dart';
 import 'package:bilimusic/common/components/desktop/pingpong_marquee_plus.dart';
@@ -114,6 +116,7 @@ class DesktopPlayerBar extends ConsumerWidget {
             Expanded(
               flex: 2,
               child: _ActionSection(
+                item: item,
                 state: state,
                 onOpenParts: item == null || state.availableParts.length < 2
                     ? null
@@ -190,13 +193,16 @@ class _TrackSection extends StatelessWidget {
                     isActive: isFavorite,
                   ),
                   const SizedBox(width: 10),
-                  BarIconButton(
-                    onPressed: onCommentPressed,
-                    icon: HugeIcon(
+                  BadgedIconButton(
+                    noBadgeIcon: HugeIcon(
                       icon: HugeIcons.strokeRoundedComment01,
                       size: 20,
                       strokeWidth: 2,
                     ),
+                    badgeIcon: const Icon(BmIcons.commentWithBadge, size: 26),
+                    badge: formatCommentBadgeCount(item?.replyCount),
+                    onPressed: onCommentPressed,
+                    tooltip: '评论',
                   ),
                 ],
               ),
@@ -416,12 +422,14 @@ class _PlaybackSection extends StatelessWidget {
 
 class _ActionSection extends StatelessWidget {
   const _ActionSection({
+    required this.item,
     required this.state,
     required this.onOpenParts,
     required this.onOpenQueue,
     required this.onSelectQuality,
   });
 
+  final PlayableItem? item;
   final PlayerState state;
   final VoidCallback? onOpenParts;
   final VoidCallback onOpenQueue;
@@ -437,9 +445,15 @@ class _ActionSection extends StatelessWidget {
       children: <Widget>[
         DesktopQualityAttach(qualities: qualities, onSelected: onSelectQuality),
         const SizedBox(width: 10),
-        BarIconButton(
+        BadgedIconButton(
+          noBadgeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedListVideo,
+            size: 22,
+          ),
+          badgeIcon: const Icon(BmIcons.partListWithBadge, size: 26),
+          badge: formatPartBadge(item),
+          badgeOffset: const Offset(-10, -2),
           onPressed: onOpenParts,
-          icon: HugeIcon(icon: HugeIcons.strokeRoundedListVideo, size: 22),
           tooltip: '选择分 P',
         ),
         const SizedBox(width: 10),
