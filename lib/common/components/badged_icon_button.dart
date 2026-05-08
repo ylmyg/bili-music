@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BadgedIconButton extends StatelessWidget {
+class BadgedIconButton extends StatefulWidget {
   const BadgedIconButton({
     super.key,
     required this.noBadgeIcon,
@@ -13,6 +13,11 @@ class BadgedIconButton extends StatelessWidget {
     this.badgeOffset = const Offset(-4, 4),
     this.enabledColor,
     this.disabledColor,
+    this.hoverColor,
+    this.activeColor,
+    this.isActive = false,
+    this.tooltip,
+    this.cursor,
   });
 
   final Widget noBadgeIcon;
@@ -25,52 +30,94 @@ class BadgedIconButton extends StatelessWidget {
   final Offset badgeOffset;
   final Color? enabledColor;
   final Color? disabledColor;
+  final Color? hoverColor;
+  final Color? activeColor;
+  final bool isActive;
+  final String? tooltip;
+  final MouseCursor? cursor;
 
-  bool get _isEnabled => onPressed != null;
-  bool get _hasBadge => badge != null;
+  @override
+  State<BadgedIconButton> createState() => _BadgedIconButtonState();
+}
+
+class _BadgedIconButtonState extends State<BadgedIconButton> {
+  bool _isHovered = false;
+
+  bool get _isEnabled => widget.onPressed != null;
+  bool get _hasBadge => widget.badge != null;
 
   @override
   Widget build(BuildContext context) {
-    final Object? badge = this.badge;
+    final Object? badge = widget.badge;
     final Color iconColor = _resolveIconColor(context);
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        SizedBox(
-          width: size,
-          height: size,
-          child: InkResponse(
-            onTap: onPressed,
-            radius: tapRadius,
-            child: Center(
-              child: SizedBox(
-                width: iconSize,
-                height: iconSize,
-                child: IconTheme.merge(
-                  data: IconThemeData(size: iconSize, color: iconColor),
-                  child: _hasBadge ? badgeIcon : noBadgeIcon,
+    final Widget button = MouseRegion(
+      cursor:
+          widget.cursor ??
+          (_isEnabled ? SystemMouseCursors.click : MouseCursor.defer),
+      onEnter: _isEnabled ? (_) => setState(() => _isHovered = true) : null,
+      onExit: _isEnabled ? (_) => setState(() => _isHovered = false) : null,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: InkResponse(
+              onTap: widget.onPressed,
+              radius: widget.tapRadius,
+              child: Center(
+                child: SizedBox(
+                  width: widget.iconSize,
+                  height: widget.iconSize,
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      size: widget.iconSize,
+                      color: iconColor,
+                    ),
+                    child: _hasBadge ? widget.badgeIcon : widget.noBadgeIcon,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        if (_isEnabled && badge != null)
-          Positioned(
-            top: badgeOffset.dy,
-            right: badgeOffset.dx,
-            child: IgnorePointer(child: BadgedIconButtonBadge(content: badge)),
-          ),
-      ],
+          if (_isEnabled && badge != null)
+            Positioned(
+              top: widget.badgeOffset.dy,
+              right: widget.badgeOffset.dx,
+              child: IgnorePointer(
+                child: BadgedIconButtonBadge(content: badge),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    final String? tooltip = widget.tooltip;
+    if (tooltip == null) {
+      return button;
+    }
+
+    return Tooltip(
+      waitDuration: const Duration(milliseconds: 600),
+      message: tooltip,
+      child: button,
     );
   }
 
   Color _resolveIconColor(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     if (!_isEnabled) {
-      return disabledColor ?? colorScheme.onSurface.withValues(alpha: 0.38);
+      return widget.disabledColor ??
+          colorScheme.onSurface.withValues(alpha: 0.38);
     }
-    return enabledColor ?? colorScheme.onSurface;
+    if (widget.isActive) {
+      return widget.activeColor ?? colorScheme.primary;
+    }
+    if (_isHovered) {
+      return widget.hoverColor ?? colorScheme.primary;
+    }
+    return widget.enabledColor ?? colorScheme.onSurface;
   }
 }
 
