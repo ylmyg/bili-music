@@ -190,7 +190,7 @@ class _PlayerToolBar extends StatelessWidget {
           onTap: onPartTap,
         ),
         _PlayerToolButton(
-          icon: const Icon(Icons.folder_open_outlined),
+          icon: HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
           isEnabled: hasItem,
           onTap: onOpenCollectionSheet,
         ),
@@ -224,8 +224,8 @@ class _PlayerCommentToolButton extends StatelessWidget {
     final String? badgeLabel = _formatCommentBadgeCount(commentCount);
 
     return BadgedIconButton(
-      noBadgeIcon: const Icon(Icons.comment_outlined),
-      badgeIcon: const Icon(BmIcons.commentWithBadge),
+      noBadgeIcon: HugeIcon(icon: HugeIcons.strokeRoundedComment01),
+      badgeIcon: const Icon(BmIcons.commentWithBadge, size: 26),
       badge: badgeLabel,
       onPressed: isEnabled ? onTap : null,
     );
@@ -316,11 +316,8 @@ String? _formatCommentBadgeCount(int? count) {
   if (count == null || count <= 0) {
     return null;
   }
-  if (count <= 99) {
-    return count.toString();
-  }
   if (count <= 999) {
-    return '99+';
+    return count.toString();
   }
   return '999+';
 }
@@ -339,12 +336,19 @@ class _PlayerPartToolButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int currentPage = item?.page ?? 1;
+    final int digitCount = currentPage.toString().length;
+    final Offset badgeOffset = switch (digitCount) {
+      1 => const Offset(2, 4),
+      2 => const Offset(-2, 4),
+      _ => const Offset(-6, 4),
+    };
 
     return BadgedIconButton(
       noBadgeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
-      badgeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedListVideo),
+      badgeIcon: const Icon(BmIcons.partListWithBadge, size: 26),
       badge: 'P$currentPage',
       onPressed: isEnabled ? onTap : null,
+      badgeOffset: badgeOffset,
     );
   }
 }
