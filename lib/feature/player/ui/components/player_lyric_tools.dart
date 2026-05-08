@@ -65,7 +65,7 @@ class _LyricOffsetSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               IconButton(
-                tooltip: '歌词提前 0.5 秒',
+                tooltip: '歌词延后 0.5 秒',
                 onPressed: () => controller.adjustOffset(-_stepMs),
                 icon: const Icon(Icons.remove_rounded),
               ),
@@ -82,7 +82,7 @@ class _LyricOffsetSheet extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                tooltip: '歌词延后 0.5 秒',
+                tooltip: '歌词提前 0.5 秒',
                 onPressed: () => controller.adjustOffset(_stepMs),
                 icon: const Icon(Icons.add_rounded),
               ),
