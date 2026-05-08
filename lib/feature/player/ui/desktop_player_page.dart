@@ -715,7 +715,7 @@ class _DesktopPlayerControlDeck extends StatelessWidget {
                             size: 26,
                           ),
                           badge: formatPartBadge(item),
-                          badgeOffset: const Offset(-10, -2),
+                          badgeOffset: const Offset(-4, -2),
                           tooltip: '选择分 P',
                           onPressed: onPartTap,
                         ),
