@@ -1,4 +1,6 @@
+import 'package:bilimusic/core/theme/theme_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class PlayerTopBar extends StatelessWidget {
   const PlayerTopBar({
@@ -14,8 +16,6 @@ class PlayerTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final Color iconColor = theme.colorScheme.primary;
 
     return SizedBox(
       height: 48,
@@ -24,15 +24,16 @@ class PlayerTopBar extends StatelessWidget {
           IconButton(
             onPressed: onBack,
             icon: const Icon(Icons.keyboard_arrow_down_rounded),
-            color: iconColor,
           ),
           Expanded(
             child: Center(child: PlayerPageIndicator(currentPage: currentPage)),
           ),
           IconButton(
             onPressed: onOpenInBrowser,
-            icon: const Icon(Icons.ios_share_outlined),
-            color: iconColor,
+            icon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedShare04,
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -52,7 +53,7 @@ class PlayerPageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final neutralColor = neutralColorOf(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -61,13 +62,13 @@ class PlayerPageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          width: isActive ? 18 : 6,
-          height: 6,
+          width: isActive ? 12 : 3,
+          height: 3,
           margin: EdgeInsets.only(right: index < pageCount - 1 ? 8 : 0),
           decoration: BoxDecoration(
             color: isActive
-                ? colorScheme.primary
-                : colorScheme.primary.withValues(alpha: 0.28),
+                ? neutralColor
+                : neutralColor.withValues(alpha: 0.28),
             borderRadius: BorderRadius.circular(999),
           ),
         );
