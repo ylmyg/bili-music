@@ -1,11 +1,11 @@
 import 'package:bilimusic/common/components/queue_mode_icon.dart';
 import 'package:bilimusic/core/theme/theme_colors.dart';
 import 'package:bilimusic/feature/player/domain/player_state.dart';
-import 'package:bilimusic/feature/player/ui/components/player_ui_helpers.dart';
+import 'package:bilimusic/feature/player/logic/utils/player_ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-class PlayerProgressSection extends StatelessWidget {
+class PlayerProgressSection extends StatefulWidget {
   const PlayerProgressSection({
     super.key,
     required this.position,
@@ -20,14 +20,38 @@ class PlayerProgressSection extends StatelessWidget {
   final ValueChanged<double> onChanged;
 
   @override
+  State<PlayerProgressSection> createState() => _PlayerProgressSectionState();
+}
+
+class _PlayerProgressSectionState extends State<PlayerProgressSection> {
+  bool _isDragging = false;
+  double? _dragProgress;
+  double? _settledProgress;
+
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final neutralColor = neutralColorOf(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final Duration total = duration ?? Duration.zero;
+    final Duration total = widget.duration ?? Duration.zero;
     final double progress = total.inMilliseconds <= 0
         ? 0
-        : position.inMilliseconds / total.inMilliseconds;
+        : widget.position.inMilliseconds / total.inMilliseconds;
+    final double visualProgress = _isDragging || _settledProgress != null
+        ? (_dragProgress ?? progress).clamp(0.0, 1.0)
+        : progress.clamp(0.0, 1.0);
+
+    if (_settledProgress != null && !_isDragging) {
+      final double targetProgress = _settledProgress!;
+      final double delta = (progress - targetProgress).abs();
+      if (delta <= 0.005) {
+        _settledProgress = null;
+      }
+    }
+
+    final Duration visualPosition = Duration(
+      milliseconds: (total.inMilliseconds * visualProgress).round(),
+    );
 
     return Column(
       children: <Widget>[
@@ -42,8 +66,33 @@ class PlayerProgressSection extends StatelessWidget {
             overlayColor: neutralColor.withValues(alpha: 0.14),
           ),
           child: Slider(
-            value: progress.clamp(0.0, 1.0),
-            onChanged: isReady ? onChanged : null,
+            value: visualProgress,
+            onChangeStart: widget.isReady
+                ? (double value) {
+                    setState(() {
+                      _isDragging = true;
+                      _dragProgress = value;
+                      _settledProgress = null;
+                    });
+                  }
+                : null,
+            onChanged: widget.isReady
+                ? (double value) {
+                    setState(() {
+                      _dragProgress = value;
+                    });
+                  }
+                : null,
+            onChangeEnd: widget.isReady
+                ? (double value) {
+                    setState(() {
+                      _isDragging = false;
+                      _dragProgress = value;
+                      _settledProgress = value;
+                    });
+                    widget.onChanged(value);
+                  }
+                : null,
           ),
         ),
         Padding(
@@ -51,7 +100,7 @@ class PlayerProgressSection extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Text(
-                formatPlayerDuration(position),
+                formatPlayerDuration(visualPosition),
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.55),
                   fontWeight: FontWeight.w700,
@@ -103,9 +152,6 @@ class PlayerTransportControls extends StatelessWidget {
     final Color iconColor = state.isReady
         ? playerControlColor
         : disabledPlayerControlColor;
-    final Color activeModeColor = state.isReady
-        ? playerControlColor
-        : disabledPlayerControlColor;
     final bool canGoPrevious = state.isReady && state.hasPrevious;
     final bool canGoNext =
         state.isReady &&
@@ -116,7 +162,7 @@ class PlayerTransportControls extends StatelessWidget {
       children: <Widget>[
         PlayerCircleActionButton(
           icon: queueModeIcon(state.queueMode),
-          color: state.isReady ? activeModeColor : iconColor,
+          color: iconColor,
           onPressed: state.hasQueue ? onToggleQueueMode : null,
         ),
         PlayerCircleActionButton(

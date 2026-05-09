@@ -1,10 +1,11 @@
 import 'package:bilimusic/feature/player/domain/playable_item.dart';
 import 'package:bilimusic/feature/player/domain/player_lyrics_state.dart';
 import 'package:bilimusic/feature/player/domain/player_state.dart';
-import 'package:bilimusic/feature/player/logic/player_controller.dart';
 import 'package:bilimusic/feature/player/logic/player_lyrics_controller.dart';
+import 'package:bilimusic/feature/player/logic/player_progress_provider.dart';
 import 'package:bilimusic/feature/player/ui/components/player_lyric_panel.dart';
 import 'package:bilimusic/feature/player/ui/components/player_lyric_tools.dart';
+import 'package:bilimusic/feature/player/logic/utils/player_progress_ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,15 +72,19 @@ class _PlayerLyricPanelHost extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (:position, :duration) = ref.watch(
-      playerControllerProvider.select(
-        (PlayerState state) =>
-            (position: state.position, duration: state.duration),
-      ),
+    final AsyncValue<PlayerProgressSnapshot> progressAsync = ref.watch(
+      playerProgressProvider,
+    );
+    final PlayerProgressSnapshot progress = resolvePlayerProgressSnapshot(
+      progressAsync,
+      baseState,
     );
 
     return PlayerLyricPanel(
-      state: baseState.copyWith(position: position, duration: duration),
+      state: baseState.copyWith(
+        position: progress.position,
+        duration: progress.duration,
+      ),
       item: item,
       isActive: isActive,
       onSeek: onSeek,

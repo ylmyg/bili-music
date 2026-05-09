@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:bilimusic/common/bm_icons.dart';
 import 'package:bilimusic/common/components/badged_icon_button.dart';
 import 'package:bilimusic/feature/player/domain/audio_stream_info.dart';
@@ -8,11 +6,12 @@ import 'package:bilimusic/feature/player/domain/player_online_audience.dart';
 import 'package:bilimusic/feature/player/domain/player_state.dart';
 import 'package:bilimusic/feature/player/logic/player_controller.dart';
 import 'package:bilimusic/feature/player/logic/player_online_audience_controller.dart';
+import 'package:bilimusic/feature/player/logic/player_progress_provider.dart';
 import 'package:bilimusic/feature/player/ui/components/player_artwork.dart';
 import 'package:bilimusic/feature/player/ui/components/player_controls.dart';
 import 'package:bilimusic/feature/player/ui/components/player_shared.dart';
-import 'package:bilimusic/feature/player/ui/components/player_ui_helpers.dart';
-import 'package:flutter/foundation.dart';
+import 'package:bilimusic/feature/player/logic/utils/player_progress_ui_helpers.dart';
+import 'package:bilimusic/feature/player/logic/utils/player_ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -99,7 +98,9 @@ class PlayerMainPage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
-            _RepaintSection(child: _PlayerProgressHost(onChanged: onSeek)),
+            _RepaintSection(
+              child: _PlayerProgressHost(state: state, onChanged: onSeek),
+            ),
             const SizedBox(height: 10),
             _RepaintSection(
               child: PlayerTransportControls(
@@ -223,88 +224,27 @@ class _PlayerStatusAndTools extends StatelessWidget {
   }
 }
 
-class _PlayerProgressHost extends ConsumerStatefulWidget {
-  const _PlayerProgressHost({required this.onChanged});
+class _PlayerProgressHost extends ConsumerWidget {
+  const _PlayerProgressHost({required this.state, required this.onChanged});
 
+  final PlayerState state;
   final ValueChanged<double> onChanged;
 
   @override
-  ConsumerState<_PlayerProgressHost> createState() =>
-      _PlayerProgressHostState();
-}
-
-class _PlayerProgressHostState extends ConsumerState<_PlayerProgressHost> {
-  static const Duration _progressUpdateInterval = Duration(milliseconds: 250);
-
-  Timer? _progressUpdateTimer;
-  Duration _displayPosition = Duration.zero;
-  Duration? _displayDuration;
-  bool _displayIsReady = false;
-  ({Duration position, Duration? duration, bool isReady})? _pendingProgress;
-
-  @override
-  void initState() {
-    super.initState();
-    final (:position, :duration, :isReady) = ref.read(
-      playerControllerProvider.select(
-        (PlayerState state) => (
-          position: state.position,
-          duration: state.duration,
-          isReady: state.isReady,
-        ),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<PlayerProgressSnapshot> progressAsync = ref.watch(
+      playerProgressProvider,
     );
-    _displayPosition = position;
-    _displayDuration = duration;
-    _displayIsReady = isReady;
-
-    ref.listenManual(
-      playerControllerProvider.select(
-        (PlayerState state) => (
-          position: state.position,
-          duration: state.duration,
-          isReady: state.isReady,
-        ),
-      ),
-      (_, ({Duration position, Duration? duration, bool isReady}) next) {
-        _pendingProgress = next;
-        _progressUpdateTimer ??= Timer(
-          _progressUpdateInterval,
-          _flushPendingProgress,
-        );
-      },
+    final PlayerProgressSnapshot progress = resolvePlayerProgressSnapshot(
+      progressAsync,
+      state,
     );
-  }
 
-  @override
-  void dispose() {
-    _progressUpdateTimer?.cancel();
-    super.dispose();
-  }
-
-  void _flushPendingProgress() {
-    _progressUpdateTimer = null;
-    final ({Duration position, Duration? duration, bool isReady})? next =
-        _pendingProgress;
-    if (next == null || !mounted) {
-      return;
-    }
-    _pendingProgress = null;
-    setState(() {
-      _displayPosition = next.position;
-      _displayDuration = next.duration;
-      _displayIsReady = next.isReady;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('build PlayerProgressSection');
     return PlayerProgressSection(
-      position: _displayPosition,
-      duration: _displayDuration,
-      isReady: _displayIsReady,
-      onChanged: widget.onChanged,
+      position: progress.position,
+      duration: progress.duration,
+      isReady: progress.isReady,
+      onChanged: onChanged,
     );
   }
 }
