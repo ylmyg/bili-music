@@ -9,6 +9,7 @@ import 'package:bilimusic/feature/player/logic/player_online_audience_controller
 import 'package:bilimusic/feature/player/logic/player_progress_provider.dart';
 import 'package:bilimusic/feature/player/ui/components/player_artwork.dart';
 import 'package:bilimusic/feature/player/ui/components/player_controls.dart';
+import 'package:bilimusic/feature/player/ui/components/player_quality_badge.dart';
 import 'package:bilimusic/feature/player/ui/components/player_shared.dart';
 import 'package:bilimusic/feature/player/logic/utils/player_progress_ui_helpers.dart';
 import 'package:bilimusic/feature/player/logic/utils/player_ui_helpers.dart';
@@ -360,15 +361,8 @@ class _PlayerQualityToolButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AudioQualityOption? selected = qualities
-        .where((AudioQualityOption option) => option.isSelected)
-        .firstOrNull;
-
-    return BadgedIconButton(
-      noBadgeIcon: const Icon(Icons.graphic_eq_rounded),
-      badgeIcon: const Icon(Icons.graphic_eq_rounded),
-      badge: selected?.label,
-      badgeOffset: const Offset(-12, -2),
+    final String badgeLabel = qualityBadgeLabel(qualities: qualities);
+    return IconButton(
       onPressed: !isEnabled
           ? null
           : () => _showPlayerQualitySheet(
@@ -376,6 +370,7 @@ class _PlayerQualityToolButton extends ConsumerWidget {
               ref: ref,
               qualities: qualities,
             ),
+      icon: PlayerQualityBadge(label: badgeLabel),
     );
   }
 }
