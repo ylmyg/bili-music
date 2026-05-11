@@ -144,11 +144,30 @@ class _PlayerLyricPanelState extends ConsumerState<PlayerLyricPanel> {
       return LayoutBuilder(
         key: ValueKey<String>('lyrics-$itemKey'),
         builder: (BuildContext context, BoxConstraints constraints) {
-          return LyricView(
-            controller: _lyricController,
-            style: _buildLyricStyle(context),
-            width: constraints.maxWidth,
-            height: constraints.maxHeight,
+          final LyricStyle style = _buildLyricStyle(context);
+          final EdgeInsets lyricPadding = _isDesktop
+              ? const EdgeInsets.symmetric(horizontal: 30)
+              : EdgeInsets.zero;
+          return Stack(
+            children: <Widget>[
+              Padding(
+                padding: lyricPadding,
+                child: LyricView(
+                  controller: _lyricController,
+                  style: style,
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                ),
+              ),
+              _PlayerLyricSelectionProgress(
+                controller: _lyricController,
+                variant: widget.variant,
+                onPlay: (SelectionState state) {
+                  _lyricController.stopSelection();
+                  widget.onSeek(state.duration);
+                },
+              ),
+            ],
           );
         },
       );
@@ -361,5 +380,183 @@ class _PlayerLyricPanelStatus extends StatelessWidget {
               child: content,
             ),
     );
+  }
+}
+
+class _PlayerLyricSelectionProgress extends StatelessWidget {
+  const _PlayerLyricSelectionProgress({
+    required this.controller,
+    required this.variant,
+    required this.onPlay,
+  });
+
+  final LyricController controller;
+  final PlayerLyricPanelVariant variant;
+  final ValueChanged<SelectionState> onPlay;
+
+  bool get _isDesktop => variant == PlayerLyricPanelVariant.desktop;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color labelColor = colorScheme.onSurfaceVariant;
+    final Color labelBackground = colorScheme.surfaceContainerHighest
+        .withValues(alpha: 0.52);
+
+    return SelectListenableBuilder(
+      controller: controller,
+      builder: (SelectionState state, Widget? child) {
+        return Positioned(
+          top: state.centerY,
+          right: 0,
+          left: 0,
+          child: FractionalTranslation(
+            translation: const Offset(0, -0.5),
+            transformHitTests: true,
+            child: SizedBox(
+              height: 200,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: _isDesktop
+                    ? _buildDesktopSelection(context, state, labelColor)
+                    : _buildMobileSelection(state, labelColor, labelBackground),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildDesktopSelection(
+    BuildContext context,
+    SelectionState state,
+    Color labelColor,
+  ) {
+    final Color dividerColor = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.72);
+
+    return <Widget>[
+      Positioned(
+        left: 0,
+        child: Text(
+          _formatDuration(state.duration),
+          style: TextStyle(
+            color: labelColor,
+            fontSize: 12,
+            height: 1,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      Positioned(
+        left: 40,
+        right: 40,
+        child: Container(height: 1, color: dividerColor),
+      ),
+      Positioned(
+        right: 0,
+        child: IconButton(
+          visualDensity: VisualDensity.compact,
+          onPressed: () => onPlay(state),
+          icon: Icon(Icons.play_arrow_rounded, size: 24, color: labelColor),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildMobileSelection(
+    SelectionState state,
+    Color labelColor,
+    Color labelBackground,
+  ) {
+    return <Widget>[
+      Positioned(
+        right: 0,
+        child: GestureDetector(
+          onTap: () => onPlay(state),
+          child: DecoratedBox(
+            decoration: _PlayerLyricSelectionDecoration(color: labelBackground),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 3,
+                vertical: 2,
+              ).copyWith(left: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.play_arrow_rounded, size: 13, color: labelColor),
+                  const SizedBox(width: 1),
+                  Text(
+                    _formatDuration(state.duration),
+                    style: TextStyle(
+                      color: labelColor,
+                      fontSize: 11,
+                      height: 1,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  static String _formatDuration(Duration duration) {
+    final int minutes = duration.inMinutes;
+    final int seconds = duration.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
+  }
+}
+
+class _PlayerLyricSelectionDecoration extends Decoration {
+  const _PlayerLyricSelectionDecoration({required this.color});
+
+  final Color color;
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _PlayerLyricSelectionBoxPainter(color, onChanged);
+  }
+}
+
+class _PlayerLyricSelectionBoxPainter extends BoxPainter {
+  _PlayerLyricSelectionBoxPainter(this.color, VoidCallback? onChanged)
+    : super(onChanged);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final Size? size = configuration.size;
+    if (size == null) {
+      return;
+    }
+
+    const double radius = 4;
+    const double triangleWidth = 3;
+
+    final Paint paint = Paint()..color = color;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+        const Radius.circular(radius),
+      ),
+      paint,
+    );
+
+    final Path path = Path()
+      ..moveTo(offset.dx - triangleWidth, offset.dy + size.height / 2)
+      ..lineTo(offset.dx, offset.dy + radius)
+      ..lineTo(offset.dx, offset.dy + size.height - radius)
+      ..close();
+
+    canvas.drawPath(path, paint);
   }
 }
