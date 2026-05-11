@@ -1,6 +1,6 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-class AppImageCacheManager extends CacheManager {
+class AppImageCacheManager extends CacheManager with ImageCacheManager {
   AppImageCacheManager._()
     : super(
         Config(

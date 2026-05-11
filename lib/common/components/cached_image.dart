@@ -23,6 +23,7 @@ class CommonCachedImage extends StatelessWidget {
     this.maxDiskCacheHeight,
   });
 
+  static const int _defaultMinCacheExtent = 240;
   static const int _defaultMaxCacheExtent = 720;
 
   final String? imageUrl;
@@ -76,6 +77,7 @@ class CommonCachedImage extends StatelessWidget {
         memCacheHeight: resolvedMemCacheHeight,
         maxWidthDiskCache: resolvedMaxDiskCacheWidth,
         maxHeightDiskCache: resolvedMaxDiskCacheHeight,
+        filterQuality: FilterQuality.medium,
         placeholder: (BuildContext context, String url) {
           return loadingState;
         },
@@ -107,7 +109,7 @@ class CommonCachedImage extends StatelessWidget {
     }
 
     final int physicalExtent = (logicalExtent * devicePixelRatio).ceil();
-    return physicalExtent.clamp(1, _defaultMaxCacheExtent);
+    return physicalExtent.clamp(_defaultMinCacheExtent, _defaultMaxCacheExtent);
   }
 
   Widget _buildDefaultFallback() {
