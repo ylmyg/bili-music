@@ -93,9 +93,7 @@ class _PlayerPageState extends ConsumerState<PlayerPage> {
     final bool isLyricPageActive = _currentPage == 2;
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color? coverColor = ref
-        .watch(playerCoverColorProvider(item?.coverUrl))
-        .maybeWhen(data: (Color? color) => color, orElse: () => null);
+    final Color? coverColor = ref.watch(playerCoverColorControllerProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,

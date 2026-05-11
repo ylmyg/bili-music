@@ -9,71 +9,56 @@ part of 'player_cover_color_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(playerCoverColor)
-final playerCoverColorProvider = PlayerCoverColorFamily._();
+@ProviderFor(PlayerCoverColorController)
+final playerCoverColorControllerProvider =
+    PlayerCoverColorControllerProvider._();
 
-final class PlayerCoverColorProvider
-    extends $FunctionalProvider<AsyncValue<Color?>, Color?, FutureOr<Color?>>
-    with $FutureModifier<Color?>, $FutureProvider<Color?> {
-  PlayerCoverColorProvider._({
-    required PlayerCoverColorFamily super.from,
-    required String? super.argument,
-  }) : super(
-         retry: null,
-         name: r'playerCoverColorProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$playerCoverColorHash();
+final class PlayerCoverColorControllerProvider
+    extends $NotifierProvider<PlayerCoverColorController, Color?> {
+  PlayerCoverColorControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'playerCoverColorControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  String toString() {
-    return r'playerCoverColorProvider'
-        ''
-        '($argument)';
-  }
+  String debugGetCreateSourceHash() => _$playerCoverColorControllerHash();
 
   @$internal
   @override
-  $FutureProviderElement<Color?> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  PlayerCoverColorController create() => PlayerCoverColorController();
 
-  @override
-  FutureOr<Color?> create(Ref ref) {
-    final argument = this.argument as String?;
-    return playerCoverColor(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is PlayerCoverColorProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Color? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Color?>(value),
+    );
   }
 }
 
-String _$playerCoverColorHash() => r'603725bf2e39ccb38772da41cac378c287c1dde8';
+String _$playerCoverColorControllerHash() =>
+    r'856cfd13f13d9eb1b01fdfd68214565d2eadd383';
 
-final class PlayerCoverColorFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<Color?>, String?> {
-  PlayerCoverColorFamily._()
-    : super(
-        retry: null,
-        name: r'playerCoverColorProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
-
-  PlayerCoverColorProvider call(String? coverUrl) =>
-      PlayerCoverColorProvider._(argument: coverUrl, from: this);
-
+abstract class _$PlayerCoverColorController extends $Notifier<Color?> {
+  Color? build();
+  @$mustCallSuper
   @override
-  String toString() => r'playerCoverColorProvider';
+  void runBuild() {
+    final ref = this.ref as $Ref<Color?, Color?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Color?, Color?>,
+              Color?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
 }
