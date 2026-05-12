@@ -5,6 +5,7 @@ import 'package:bilimusic/feature/favorites/logic/favorites_controller.dart';
 import 'package:bilimusic/feature/meting/data/meting_repository.dart';
 import 'package:bilimusic/feature/meting/domain/meting_search_item.dart';
 import 'package:bilimusic/feature/meting/domain/meting_search_response.dart';
+import 'package:bilimusic/feature/meting/domain/meting_server.dart';
 import 'package:bilimusic/feature/meting/logic/meting_logic.dart';
 import 'package:bilimusic/feature/player/data/player_lyrics_cache_repository.dart';
 import 'package:bilimusic/feature/player/domain/playable_item.dart';
@@ -73,7 +74,7 @@ class PlayerLyricsController extends _$PlayerLyricsController {
     await _saveCacheIfEligible(item: item!, nextState: nextState);
   }
 
-  Future<void> searchManual(String keyword) async {
+  Future<void> searchManual(String keyword, {MetingServer? server}) async {
     final PlayableItem? item = ref.read(playerControllerProvider).currentItem;
     final String? stableId = item?.stableId;
     if (item == null || stableId == null || state.stableId != stableId) {
@@ -92,7 +93,7 @@ class PlayerLyricsController extends _$PlayerLyricsController {
       final MetingLogic metingLogic = ref.read(metingLogicProvider);
       final MetingSearchResponse response = await metingLogic.search(
         keyword: trimmedKeyword,
-        server: metingLogic.resolveServer(trimmedKeyword),
+        server: server ?? metingLogic.resolveServer(trimmedKeyword),
       );
       if (state.stableId != stableId) {
         return;

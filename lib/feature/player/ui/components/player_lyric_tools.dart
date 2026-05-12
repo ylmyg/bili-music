@@ -1,4 +1,5 @@
 import 'package:bilimusic/feature/meting/domain/meting_search_item.dart';
+import 'package:bilimusic/feature/meting/domain/meting_server.dart';
 import 'package:bilimusic/feature/player/domain/playable_item.dart';
 import 'package:bilimusic/feature/player/domain/player_lyrics_state.dart';
 import 'package:bilimusic/feature/player/logic/player_lyrics_controller.dart';
@@ -113,6 +114,7 @@ class _LyricSearchSheet extends ConsumerStatefulWidget {
 
 class _LyricSearchSheetState extends ConsumerState<_LyricSearchSheet> {
   late final TextEditingController _controller;
+  MetingServer _selectedServer = MetingServer.netease;
 
   @override
   void initState() {
@@ -123,7 +125,9 @@ class _LyricSearchSheetState extends ConsumerState<_LyricSearchSheet> {
       if (keyword.isEmpty) {
         return;
       }
-      ref.read(playerLyricsControllerProvider.notifier).searchManual(keyword);
+      ref
+          .read(playerLyricsControllerProvider.notifier)
+          .searchManual(keyword, server: _selectedServer);
     });
   }
 
@@ -151,6 +155,7 @@ class _LyricSearchSheetState extends ConsumerState<_LyricSearchSheet> {
               Row(
                 children: <Widget>[
                   Expanded(
+                    flex: 1,
                     child: TextField(
                       controller: _controller,
                       textInputAction: TextInputAction.search,
@@ -161,6 +166,30 @@ class _LyricSearchSheetState extends ConsumerState<_LyricSearchSheet> {
                       ),
                       onSubmitted: (_) => _submitSearch(),
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownMenu<MetingServer>(
+                    initialSelection: _selectedServer,
+                    label: const Text('平台'),
+                    width: 136,
+                    dropdownMenuEntries: MetingServer.values
+                        .map(
+                          (MetingServer server) =>
+                              DropdownMenuEntry<MetingServer>(
+                                value: server,
+                                label: server.label,
+                              ),
+                        )
+                        .toList(growable: false),
+                    onSelected: (MetingServer? server) {
+                      if (server == null || server == _selectedServer) {
+                        return;
+                      }
+                      setState(() {
+                        _selectedServer = server;
+                      });
+                      _submitSearch();
+                    },
                   ),
                 ],
               ),
@@ -239,6 +268,6 @@ class _LyricSearchSheetState extends ConsumerState<_LyricSearchSheet> {
   void _submitSearch() {
     ref
         .read(playerLyricsControllerProvider.notifier)
-        .searchManual(_controller.text);
+        .searchManual(_controller.text, server: _selectedServer);
   }
 }
