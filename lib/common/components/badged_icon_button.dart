@@ -131,7 +131,7 @@ class _BadgedIconButtonState extends State<BadgedIconButton> {
       1 => const Offset(2, 4),
       2 => const Offset(2, 4),
       3 => const Offset(-4, 4),
-      _ => const Offset(-6, 4),
+      _ => const Offset(-9, 4),
     };
   }
 }
