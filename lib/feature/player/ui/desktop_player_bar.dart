@@ -12,6 +12,7 @@ import 'package:bilimusic/feature/player/domain/playable_item.dart';
 import 'package:bilimusic/feature/player/domain/player_state.dart';
 import 'package:bilimusic/feature/player/logic/player_controller.dart';
 import 'package:bilimusic/feature/player/ui/components/desktop/quality_attach.dart';
+import 'package:bilimusic/feature/player/ui/components/desktop/play_pause_button.dart';
 import 'package:bilimusic/feature/player/ui/components/desktop/queue_mode_attach.dart';
 import 'package:bilimusic/feature/player/ui/components/player_part_selector.dart';
 import 'package:bilimusic/feature/player/ui/components/player_queue_sheet.dart';
@@ -347,9 +348,14 @@ class _PlaybackSection extends StatelessWidget {
               iconSize: 24,
             ),
             const SizedBox(width: 8),
-            _PlayPauseButton(
+            DesktopPlayPauseButton(
               isPlaying: state.isPlaying,
               onPressed: canTogglePlayback ? onTogglePlayback : null,
+              backgroundColor: ColorUtil.getShade(
+                Theme.of(context).colorScheme.primary,
+                400,
+              ),
+              foregroundColor: Colors.black,
             ),
             const SizedBox(width: 8),
             BarIconButton(
@@ -461,40 +467,6 @@ class _ActionSection extends StatelessWidget {
           icon: HugeIcon(icon: HugeIcons.strokeRoundedListMusic, size: 22),
         ),
       ],
-    );
-  }
-}
-
-class _PlayPauseButton extends StatelessWidget {
-  const _PlayPauseButton({required this.isPlaying, required this.onPressed});
-
-  final bool isPlaying;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      tooltip: isPlaying ? '暂停' : '播放',
-      icon: Icon(isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
-      iconSize: 22,
-      style: IconButton.styleFrom(
-        minimumSize: const Size(40, 30), // 宽度 > 高度，呈椭圆形
-        maximumSize: const Size(40, 30),
-        padding: EdgeInsets.zero,
-        backgroundColor: ColorUtil.getShade(
-          Theme.of(context).colorScheme.primary,
-          400,
-        ),
-        disabledBackgroundColor: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest,
-        foregroundColor: Colors.black,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20), // 大圆角形成椭圆
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
     );
   }
 }

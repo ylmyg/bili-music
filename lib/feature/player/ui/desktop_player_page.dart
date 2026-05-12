@@ -16,6 +16,7 @@ import 'package:bilimusic/feature/player/domain/player_state.dart';
 import 'package:bilimusic/feature/player/logic/player_controller.dart';
 import 'package:bilimusic/feature/player/logic/player_cover_color_provider.dart';
 import 'package:bilimusic/feature/player/logic/player_lyrics_controller.dart';
+import 'package:bilimusic/feature/player/ui/components/desktop/play_pause_button.dart';
 import 'package:bilimusic/feature/player/ui/components/desktop/quality_attach.dart';
 import 'package:bilimusic/feature/player/ui/components/desktop/queue_mode_attach.dart';
 import 'package:bilimusic/feature/player/ui/components/player_collection_sheet.dart';
@@ -617,11 +618,15 @@ class _DesktopPlayerControlDeck extends StatelessWidget {
                               onPressed: canGoPrevious ? onPrevious : null,
                             ),
                             const SizedBox(width: 14),
-                            _DesktopPlayButton(
+                            DesktopPlayPauseButton(
                               isPlaying: state.isPlaying,
                               onPressed: canTogglePlayback
                                   ? onTogglePlayback
                                   : null,
+                              backgroundColor: colorScheme.primary,
+                              disabledBackgroundColor: colorScheme.primary
+                                  .withValues(alpha: 0.32),
+                              foregroundColor: colorScheme.onPrimary,
                             ),
                             const SizedBox(width: 14),
                             BarIconButton(
@@ -743,35 +748,6 @@ class _DesktopPlayerControlDeck extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _DesktopPlayButton extends StatelessWidget {
-  const _DesktopPlayButton({required this.isPlaying, required this.onPressed});
-
-  final bool isPlaying;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(48, 36),
-        maximumSize: const Size(48, 36),
-        padding: EdgeInsets.zero,
-        backgroundColor: colorScheme.primary,
-        disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.32),
-        foregroundColor: colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      ),
-      child: Icon(
-        isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-        size: 30,
       ),
     );
   }
