@@ -1,35 +1,51 @@
+import 'package:bilimusic/common/util/color_util.dart';
 import 'package:bilimusic/feature/player/domain/playable_item.dart';
 import 'package:bilimusic/feature/player/domain/player_state.dart';
+import 'package:bilimusic/feature/player/logic/player_cover_color_provider.dart';
 import 'package:bilimusic/feature/player/logic/utils/player_ui_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PlayerMetaPage extends StatelessWidget {
+class PlayerMetaPage extends ConsumerWidget {
   const PlayerMetaPage({super.key, required this.state, required this.item});
 
   final PlayerState state;
   final PlayableItem? item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Color activeColor =
+        ref.watch(playerCoverColorControllerProvider) ??
+        Theme.of(context).colorScheme.primary;
+
     return ListView(
       physics: const BouncingScrollPhysics(),
       children: <Widget>[
-        PlayerMetaSheet(state: state, item: item),
+        PlayerMetaSheet(state: state, item: item, activeColor: activeColor),
         const SizedBox(height: 18),
-        PlayerStatsGrid(item: item),
+        PlayerStatsGrid(item: item, activeColor: activeColor),
         const SizedBox(height: 18),
         if ((item?.description ?? '').trim().isNotEmpty)
-          PlayerDescriptionCard(description: item!.description!),
+          PlayerDescriptionCard(
+            description: item!.description!,
+            activeColor: activeColor,
+          ),
       ],
     );
   }
 }
 
 class PlayerMetaSheet extends StatelessWidget {
-  const PlayerMetaSheet({super.key, required this.state, required this.item});
+  const PlayerMetaSheet({
+    super.key,
+    required this.state,
+    required this.item,
+    required this.activeColor,
+  });
 
   final PlayerState state;
   final PlayableItem? item;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +57,7 @@ class PlayerMetaSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.12)),
+        border: Border.all(color: activeColor.withValues(alpha: 0.16)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,17 +70,35 @@ class PlayerMetaSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          PlayerMetaRow(label: '标题', value: item?.title ?? '--'),
-          PlayerMetaRow(label: 'UP主', value: item?.author ?? '--'),
-          PlayerMetaRow(label: '发布时间', value: item?.publishTimeText ?? '--'),
-          PlayerMetaRow(label: 'BV', value: item?.bvid ?? '--'),
+          PlayerMetaRow(
+            label: '标题',
+            value: item?.title ?? '--',
+            activeColor: activeColor,
+          ),
+          PlayerMetaRow(
+            label: 'UP主',
+            value: item?.author ?? '--',
+            activeColor: activeColor,
+          ),
+          PlayerMetaRow(
+            label: '发布时间',
+            value: item?.publishTimeText ?? '--',
+            activeColor: activeColor,
+          ),
+          PlayerMetaRow(
+            label: 'BV',
+            value: item?.bvid ?? '--',
+            activeColor: activeColor,
+          ),
           PlayerMetaRow(
             label: '时长',
             value: resolvePlayerDurationLabel(state, item),
+            activeColor: activeColor,
           ),
           PlayerMetaRow(
             label: '分P',
             value: state.audioStream?.pageTitle ?? '--',
+            activeColor: activeColor,
             isLast: true,
           ),
         ],
@@ -78,11 +112,13 @@ class PlayerMetaRow extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
+    required this.activeColor,
     this.isLast = false,
   });
 
   final String label;
   final String value;
+  final Color activeColor;
   final bool isLast;
 
   @override
@@ -96,9 +132,7 @@ class PlayerMetaRow extends StatelessWidget {
         border: isLast
             ? null
             : Border(
-                bottom: BorderSide(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                ),
+                bottom: BorderSide(color: activeColor.withValues(alpha: 0.12)),
               ),
       ),
       child: Row(
@@ -130,9 +164,14 @@ class PlayerMetaRow extends StatelessWidget {
 }
 
 class PlayerStatsGrid extends StatelessWidget {
-  const PlayerStatsGrid({super.key, required this.item});
+  const PlayerStatsGrid({
+    super.key,
+    required this.item,
+    required this.activeColor,
+  });
 
   final PlayableItem? item;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +229,7 @@ class PlayerStatsGrid extends StatelessWidget {
         childAspectRatio: 1.85,
       ),
       itemBuilder: (BuildContext context, int index) {
-        return PlayerStatCard(entry: stats[index]);
+        return PlayerStatCard(entry: stats[index], activeColor: activeColor);
       },
     );
   }
@@ -209,9 +248,14 @@ class PlayerStatEntry {
 }
 
 class PlayerStatCard extends StatelessWidget {
-  const PlayerStatCard({super.key, required this.entry});
+  const PlayerStatCard({
+    super.key,
+    required this.entry,
+    required this.activeColor,
+  });
 
   final PlayerStatEntry entry;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +267,7 @@ class PlayerStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(color: activeColor.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: <Widget>[
@@ -231,10 +275,14 @@ class PlayerStatCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
+              color: activeColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(entry.icon, color: colorScheme.primary, size: 20),
+            child: Icon(
+              entry.icon,
+              color: ColorUtil.getShade(activeColor, 600),
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -269,9 +317,14 @@ class PlayerStatCard extends StatelessWidget {
 }
 
 class PlayerDescriptionCard extends StatelessWidget {
-  const PlayerDescriptionCard({super.key, required this.description});
+  const PlayerDescriptionCard({
+    super.key,
+    required this.description,
+    required this.activeColor,
+  });
 
   final String description;
+  final Color activeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +336,7 @@ class PlayerDescriptionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface.withValues(alpha: 0.76),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(color: activeColor.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
